@@ -1,0 +1,59 @@
+﻿@page "/time"
+@inject IJSRuntime JsRunTime
+
+<div class="p-md-4">
+    <div class="p-md-4">
+        <button class="px-4 btn btn-primary" @onclick="@GetCurrentTime">Get Current Time</button>
+
+        <p class="p-md-4">Current Time: @CurrentTime</p>
+    </div>
+    <p class="p-md-4"> Attempt some other JS interop.</p>
+</div>
+
+
+@code {
+    private MarkupString CurrentTime = new MarkupString("");
+    private IJSObjectReference walletAdapter;
+
+    async void GetCurrentTime()
+    {
+        var dateTime = await JsRunTime.InvokeAsync<string>("jsinterop.GetCurrentTime");
+
+        CurrentTime = new MarkupString(dateTime);
+
+        StateHasChanged();
+    }
+
+    async void GetPhantomWallet()
+    {
+        if (JsRunTime == null)
+        {
+            Console.WriteLine("JS Runtime is null");
+            return;
+        }
+        Console.WriteLine($"Calling getPhantomWallet to get adapter");
+        var wallet = await JsRunTime.InvokeAsync<IJSObjectReference>($"jsinterop.GetPhantomWallet", "./jsinterop.js");
+        if (wallet == null)
+        {
+            Console.WriteLine("wallet is null");
+            return;
+        }
+        var adapter = await wallet.InvokeAsync<IJSObjectReference>("adapter");
+        if (wallet == null)
+        {
+            Console.WriteLine("wallet adapter is null");
+            return;
+        }
+
+        try
+        {
+            await adapter.InvokeVoidAsync("connect");
+        }
+        catch (JSException jsEx)
+        {
+            Console.WriteLine($"JSExc: {jsEx.Message}");
+        }
+
+        StateHasChanged();
+    }
+}

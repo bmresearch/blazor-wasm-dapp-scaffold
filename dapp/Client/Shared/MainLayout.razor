@@ -1,0 +1,60 @@
+﻿@inherits LayoutComponentBase
+@inject AppState _appState
+@inject IWalletService _walletService
+@implements IDisposable
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+
+        <div class="top-row p-md-4">
+            @if (!string.IsNullOrWhiteSpace(WalletAddress))
+            {
+                <button class="px-4 btn btn-dark" disabled>@WalletAddress</button>
+            }
+            else
+            {
+                <button class="px-4 btn btn-dark" @onclick="OpenAdapterSelectionModal">Connect Wallet</button>
+            }
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    [CascadingParameter] IJSRuntime JsRuntime { get; set; }
+
+    private string WalletAddress { get; set; }
+    
+    private async void OpenAdapterSelectionModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(AdapterSelectionModal.Adapters), _walletService.WalletProviders);
+
+        var modalReference = Modal.Show<AdapterSelectionModal>("Wallet Selector", parameters);
+
+        var result = await modalReference.Result;
+        if (result.Cancelled) return;
+
+        WalletAddress = $"{_walletService.PublicKey.Key[..6]}..{_walletService.PublicKey.Key[^6..]}";
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+
+        _appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        _appState.OnChange -= StateHasChanged;
+    }
+}

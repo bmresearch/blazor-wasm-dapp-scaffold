@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dapp.Server", "Server\dapp.Server.csproj", "{A69D36CF-E1A7-4737-90B2-50F68E497E5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dapp.Client", "Client\dapp.Client.csproj", "{0553F352-5762-4945-96A5-143B64502B55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dapp.Shared", "Shared\dapp.Shared.csproj", "{286BAB42-66CA-4806-9DD3-97A6F6C9EB3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A69D36CF-E1A7-4737-90B2-50F68E497E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A69D36CF-E1A7-4737-90B2-50F68E497E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A69D36CF-E1A7-4737-90B2-50F68E497E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A69D36CF-E1A7-4737-90B2-50F68E497E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0553F352-5762-4945-96A5-143B64502B55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0553F352-5762-4945-96A5-143B64502B55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0553F352-5762-4945-96A5-143B64502B55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0553F352-5762-4945-96A5-143B64502B55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{286BAB42-66CA-4806-9DD3-97A6F6C9EB3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{286BAB42-66CA-4806-9DD3-97A6F6C9EB3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{286BAB42-66CA-4806-9DD3-97A6F6C9EB3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{286BAB42-66CA-4806-9DD3-97A6F6C9EB3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1BFD508-CB25-4F09-82FA-B7C1D07E13CA}
+	EndGlobalSection
+EndGlobal

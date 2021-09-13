@@ -1,0 +1,28 @@
+﻿@if (Networks == null)
+{
+    <p>
+        <em>Loading ...</em>
+    </p>
+}
+else
+{
+    <select class="custom-select" title="Network is required">
+        <option value="Select" selected disabled="disabled">(Choose Network)</option>
+        @for(var i = 0; i < Networks.Count; i++)
+        {
+            <option value="@i"> @Networks[i]</option>
+
+        }
+    </select>
+}
+
+
+@code {
+
+    private List<string> Networks { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+}

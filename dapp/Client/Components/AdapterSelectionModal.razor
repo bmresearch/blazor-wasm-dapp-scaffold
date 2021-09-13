@@ -1,0 +1,79 @@
+﻿@inject IJSRuntime _jsRuntime
+@inject IWalletService _walletService
+@inject AppState _appState
+@implements IDisposable
+
+@if (Connecting)
+{
+    <div class="container px-4">
+        <div class="container">
+            <div class="spinner"/>
+        </div>
+        <br>
+        <br>
+        <div class="container">
+            <em class="px-5">Connecting...</em>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container p-md-4">
+        @foreach (var adapter in Adapters)
+        {
+            <div class="container px-4 p-md-1">
+                <button @onclick="@(() => SelectAdapter(adapter.Name))" class="btn-dark btn-block">
+                    <img class="align-self-start" src="@adapter.IconUrl" height="25" width="25" alt="@adapter.Name"/>
+                    <span class="align-self-end px-2">@adapter.Name</span>
+                </button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    [Parameter] public List<WalletProvider> Adapters { get; set; }
+    
+    private bool Connecting { get; set; }
+    private WalletProvider WalletProvider { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        _appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        if (WalletProvider != null)
+        {
+            WalletProvider.OnConnected -= OnConnected;
+        }
+        _appState.OnChange -= StateHasChanged;
+    }
+
+    private async void SelectAdapter(string adapterName)
+    {
+        Connecting = true;
+        Console.WriteLine($"Adapter Selected: {adapterName}");
+        WalletProvider = Adapters.FirstOrDefault(adapter => adapter.Name == adapterName);
+        if (WalletProvider == null)
+        {
+            Connecting = false;
+            return;
+        }
+        
+        await WalletProvider.Load(_jsRuntime);
+        WalletProvider.OnConnected += OnConnected;
+        await WalletProvider.Connect();
+    }
+
+    private async void OnConnected()
+    {
+        Console.WriteLine($"Connected to provider. Account: {WalletProvider.PublicKey}");
+        _walletService.SetProvider(WalletProvider);
+        await ModalInstance.CloseAsync();
+    }
+}

@@ -1,0 +1,99 @@
+﻿@page "/"
+@using Solnet.Rpc.Builders
+@using Solnet.Programs
+@inject IJSRuntime _jsRunTime
+@inject IWalletService _walletService
+@inject AppState _appState 
+
+<div class="container p-md-4">
+    <div class="container p-md-4">
+        <h1>Hello, world!</h1>
+
+        
+        <p class="p-md-4">Welcome to your new dApp.</p>
+    </div>
+    @if (Loading)
+    {
+        <div class="container px-4">
+            <div class="container">
+                <div class="spinner"/>
+            </div>
+            <br>
+            <br>
+            <div class="container">
+                <em class="p-md-1">Connecting...</em>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (WalletAddress != null)
+        {
+            <div class="container p-md-4">
+                <p class="p-md-4">Account: @WalletAddress</p>
+                
+                <p class="p-md-4">Current Balance: @CurrentBalance SOL</p>
+                
+                <button class="px-4 btn btn-primary" @onclick="SendMemo">Send Hello SolNet x Web3.js Memo</button>
+                
+                <!--button class="px-4 btn btn-primary">Request Airdrop</button-->
+            </div>
+        }
+    }
+</div>
+
+@code {
+
+    [CascadingParameter] public IModalService Modal { get; set; }
+    
+    private IRpcClient RpcClient { get; set; }
+    private string CurrentBalance => $"{RawBalance/1_000_000_000:N2}";
+    private ulong RawBalance { get; set; }
+    private string WalletAddress { get; set; }
+    private bool Loading { get; set; }
+
+    protected override void OnInitialized()
+    {
+        RpcClient = ClientFactory.GetClient(Cluster.MainNet);
+        _appState.OnChange += StateHasChanged;
+        _walletService.OnConnected += WalletServiceOnOnConnected;
+    }
+
+    private async void WalletServiceOnOnConnected()
+    {
+        Loading = true;
+        StateHasChanged();
+        Console.WriteLine($"Connected to provider. Account: {_walletService.PublicKey}");
+        WalletAddress = _walletService.PublicKey;
+        var res = await RpcClient.GetBalanceAsync(WalletAddress);
+        RawBalance = res.Result.Value;
+        Console.WriteLine($"Account Balance: {res.Result.Value/1_000_000_000:N2}");
+        Loading = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _appState.OnChange -= StateHasChanged;
+        _walletService.OnConnected -= WalletServiceOnOnConnected;
+    }
+
+    private async Task SendMemo()
+    {
+        var blockHash = await RpcClient.GetRecentBlockHashAsync();
+        Console.WriteLine($"BlockHash: {blockHash.Result.Value.Blockhash}");
+
+        var msgBytes = new TransactionBuilder()
+            .SetRecentBlockHash(blockHash.Result.Value.Blockhash)
+            .SetFeePayer(_walletService.PublicKey)
+            .AddInstruction(MemoProgram.NewMemoV2("Hello Solnet x solana-web3.js from Blazor Wasm"))
+            .CompileMessage();
+
+        Console.WriteLine($"Message to sign: {Convert.ToBase64String(msgBytes)}");
+        var txBytes = await _walletService.SignMessage(msgBytes);
+        
+        Console.WriteLine($"Signed transaction: {Convert.ToBase64String(msgBytes)}");
+        var txSig = await RpcClient.SendTransactionAsync(txBytes);
+        Console.WriteLine($"Transaction signature: {txSig.Result}");
+    }
+}
