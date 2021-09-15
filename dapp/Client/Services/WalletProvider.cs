@@ -11,6 +11,7 @@ namespace dapp.Client.Services
     {
         private IJSRuntime _jsRuntime;
         private IJSObjectReference _wallet;
+        private IJSObjectReference _walletClass;
         private IJSObjectReference _adapter;
         private string _walletPublicKey;
         private readonly string _url;
@@ -40,7 +41,10 @@ namespace dapp.Client.Services
             _jsRuntime = jsRuntime;
             
             Console.WriteLine($"Calling {_funcName} to get adapter");
-            _wallet = await _jsRuntime.InvokeAsync<IJSObjectReference>($"jsinterop.{_funcName}", "./jsinterop.js");
+            string _func = "getWalletAdapterClass";
+            _walletClass = await _jsRuntime.InvokeAsync<IJSObjectReference>($"jsinterop.{_func}", "./jsinterop.js");
+            Console.WriteLine($"Attempting to start {_name} wallet");
+            _wallet = await _walletClass.InvokeAsync<IJSObjectReference>("GetWallet");
             if (_wallet == null)
             {
                 Console.WriteLine("wallet is null");
@@ -62,7 +66,7 @@ namespace dapp.Client.Services
                 return;
             }
             await _adapter.InvokeVoidAsync("connect");
-            await Task.Run(() => CheckConnection(_cts.Token));
+            //await Task.Run(() => CheckConnection(_cts.Token));
         }
 
         public async Task Disconnect()

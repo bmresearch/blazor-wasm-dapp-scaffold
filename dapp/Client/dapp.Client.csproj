@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <JsLibRoot>JsLib\</JsLibRoot>
     <TypeScriptToolsVersion>3.2</TypeScriptToolsVersion>
+    <AssemblyName>dapp.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

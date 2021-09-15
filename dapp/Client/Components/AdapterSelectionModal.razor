@@ -34,17 +34,32 @@ else
 @code {
 
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
-
+    private dapp.Client.JsLib.ConnectedInterop Interop { get; set; }
     [Parameter] public List<WalletProvider> Adapters { get; set; }
-    
+
     private bool Connecting { get; set; }
     private WalletProvider WalletProvider { get; set; }
-    
+
     protected override void OnInitialized()
     {
         _appState.OnChange += StateHasChanged;
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        Interop = new(_jsRuntime);
+        await Interop.SetupConnectedCallback(args => HandleConnected(args));
+    }
 
+    private Task HandleConnected(EventArgs args)
+    {
+        Console.WriteLine("args = " + args);
+        Console.WriteLine("done?");
+        return Task.CompletedTask;
+    }
     public void Dispose()
     {
         if (WalletProvider != null)
@@ -64,7 +79,7 @@ else
             Connecting = false;
             return;
         }
-        
+
         await WalletProvider.Load(_jsRuntime);
         WalletProvider.OnConnected += OnConnected;
         await WalletProvider.Connect();
