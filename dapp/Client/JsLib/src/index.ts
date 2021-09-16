@@ -41,6 +41,7 @@ export const GetSolongWallet = (config : SolongWalletAdapterConfig = {}): Wallet
 export const getWalletAdapterClass = (): WalletAdapterClass => {
     return new WalletAdapterClass();
 }
+//Do I need to do the Microsoft jsinterop thing?
 //make this class abstractify the wallet adapters, then ...
 export class WalletAdapterClass implements Wallet {
     adapter: () => WalletAdapter | SignerWalletAdapter | MessageSignerWalletAdapter;
