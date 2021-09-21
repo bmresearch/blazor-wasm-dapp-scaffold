@@ -20,6 +20,7 @@ namespace dapp.Client.Services
         private CancellationTokenSource _cts;
         private bool _connected;
         private PublicKey _publicKey;
+        private EventInterop Interop { get; set; }
 
         public WalletProvider(string name, string url, string iconUrl, string functionName) 
         {
@@ -29,7 +30,19 @@ namespace dapp.Client.Services
             _funcName = functionName;
             _cts = new CancellationTokenSource();
         }
-        
+        private async Task HandleEvent(EventArgs args)
+        {
+            Console.WriteLine("Event handled");
+            var publicKey = await GetWalletPublicKey();
+            if (publicKey == null)
+            {
+                Console.WriteLine($"publicKey object ref is null");
+                return;
+            }
+            _publicKey = new PublicKey(publicKey);
+            OnConnected?.Invoke();
+            return;
+        }
         public async Task Load(IJSRuntime jsRuntime)
         {
             if (jsRuntime == null)
@@ -38,15 +51,18 @@ namespace dapp.Client.Services
                 return;
             }
             _jsRuntime = jsRuntime;
-            
-            Console.WriteLine($"Calling {_funcName} to get adapter");
-            _wallet = await _jsRuntime.InvokeAsync<IJSObjectReference>($"jsinterop.{_funcName}", "./jsinterop.js");
+
+            //Console.WriteLine($"Calling {_funcName} to get adapter");
+            string funcToExecute = "getWalletAdapterClass";
+            _wallet = await _jsRuntime.InvokeAsync<IJSObjectReference>($"jsinterop.{funcToExecute}",_name, "./jsinterop.js");
             if (_wallet == null)
             {
                 Console.WriteLine("wallet is null");
                 return;
             }
-            _adapter = await _wallet.InvokeAsync<IJSObjectReference>("adapter");
+            Interop = new EventInterop(jsRuntime);
+            await Interop.SetupEventCallback(args => HandleEvent(args),_wallet);
+            _adapter = await _wallet.InvokeAsync<IJSObjectReference>("GetAdapter");
             if (_adapter == null)
             {
                 Console.WriteLine("wallet adapter is null");
@@ -62,7 +78,8 @@ namespace dapp.Client.Services
                 return;
             }
             await _adapter.InvokeVoidAsync("connect");
-            await Task.Run(() => CheckConnection(_cts.Token));
+
+            //await Task.Run(() => CheckConnection(_cts.Token));
         }
 
         public async Task Disconnect()
@@ -74,35 +91,50 @@ namespace dapp.Client.Services
             }
             await _adapter.InvokeVoidAsync("disconnect");
         }
-
+        //ONly Phantom exposes this
         public async Task<byte[]> SignMessage(byte[] message)
         {
-            if (_adapter == null)
+            if (_wallet == null)
             {
                 Console.WriteLine("wallet adapter is null");
                 return null;
             }
-            
-            var signature = await _adapter.InvokeAsync<byte[]>("signMessage", message);
+            Console.WriteLine("pre-sign");
+            var signature = await _wallet.InvokeAsync<byte[]>("sign", message);
             Console.WriteLine("message has been signed");
+            Console.WriteLine("signature = " + signature);
             return signature;
         }
 
         public async Task<byte[]> SignTransaction(byte[] compiledMessage)
         {
-            if (_adapter == null)
+            if (_wallet == null)
             {
                 Console.WriteLine("wallet adapter is null");
                 return null;
             }
-            
-            var txObject = await _jsRuntime.InvokeAsync<IJSObjectReference>("signTransaction", _wallet, compiledMessage);
-            Console.WriteLine("transaction has been signed");
-            if (txObject != null) return await txObject.InvokeAsync<byte[]>("serialize");
-            
-            Console.WriteLine("transaction object is null");
-            return null;
+            Console.WriteLine("pre-sign");
+            var signature = await _wallet.InvokeAsync<byte[]>("sign", compiledMessage);
+            Console.WriteLine("tx has been signed");
+            Console.WriteLine("signature = " + signature);
+            return signature;
         }
+
+        //public async Task<byte[]> SignTransaction(byte[] compiledMessage)
+        //{
+        //    if (_adapter == null)
+        //    {
+        //        Console.WriteLine("wallet adapter is null");
+        //        return null;
+        //    }
+
+        //    var txObject = await _jsRuntime.InvokeAsync<IJSObjectReference>("signTransaction", _wallet, compiledMessage);
+        //    Console.WriteLine("transaction has been signed");
+        //    if (txObject != null) return await txObject.InvokeAsync<byte[]>("serialize");
+
+        //    Console.WriteLine("transaction object is null");
+        //    return null;
+        //}
 
         private async Task CheckConnection(CancellationToken ct)
         {
