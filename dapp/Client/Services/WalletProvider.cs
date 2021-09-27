@@ -32,11 +32,10 @@ namespace dapp.Client.Services
         }
         private async Task HandleEvent(EventArgs args)
         {
-            Console.WriteLine("Event handled");
             var publicKey = await GetWalletPublicKey();
             if (publicKey == null)
             {
-                Console.WriteLine($"publicKey object ref is null");
+                Console.WriteLine($"publicKey is null");
                 return;
             }
             _publicKey = new PublicKey(publicKey);
@@ -51,8 +50,6 @@ namespace dapp.Client.Services
                 return;
             }
             _jsRuntime = jsRuntime;
-
-            //Console.WriteLine($"Calling {_funcName} to get adapter");
             string funcToExecute = "getWalletAdapterClass";
             _wallet = await _jsRuntime.InvokeAsync<IJSObjectReference>($"jsinterop.{funcToExecute}",_name, "./jsinterop.js");
             if (_wallet == null)
@@ -78,8 +75,6 @@ namespace dapp.Client.Services
                 return;
             }
             await _adapter.InvokeVoidAsync("connect");
-
-            //await Task.Run(() => CheckConnection(_cts.Token));
         }
 
         public async Task Disconnect()
@@ -91,7 +86,7 @@ namespace dapp.Client.Services
             }
             await _adapter.InvokeVoidAsync("disconnect");
         }
-        //ONly Phantom exposes this
+
         public async Task<byte[]> SignMessage(byte[] message)
         {
             if (_wallet == null)
@@ -99,10 +94,7 @@ namespace dapp.Client.Services
                 Console.WriteLine("wallet adapter is null");
                 return null;
             }
-            Console.WriteLine("pre-sign");
-            var signature = await _wallet.InvokeAsync<byte[]>("sign", message);
-            Console.WriteLine("message has been signed");
-            Console.WriteLine("signature = " + signature);
+            var signature = await _wallet.InvokeAsync<byte[]>("signMessage", message);
             return signature;
         }
 
@@ -113,45 +105,8 @@ namespace dapp.Client.Services
                 Console.WriteLine("wallet adapter is null");
                 return null;
             }
-            Console.WriteLine("pre-sign");
-            var signature = await _wallet.InvokeAsync<byte[]>("sign", compiledMessage);
-            Console.WriteLine("tx has been signed");
-            Console.WriteLine("signature = " + signature);
+            var signature = await _wallet.InvokeAsync<byte[]>("signTransaction", compiledMessage);
             return signature;
-        }
-
-        //public async Task<byte[]> SignTransaction(byte[] compiledMessage)
-        //{
-        //    if (_adapter == null)
-        //    {
-        //        Console.WriteLine("wallet adapter is null");
-        //        return null;
-        //    }
-
-        //    var txObject = await _jsRuntime.InvokeAsync<IJSObjectReference>("signTransaction", _wallet, compiledMessage);
-        //    Console.WriteLine("transaction has been signed");
-        //    if (txObject != null) return await txObject.InvokeAsync<byte[]>("serialize");
-
-        //    Console.WriteLine("transaction object is null");
-        //    return null;
-        //}
-
-        private async Task CheckConnection(CancellationToken ct)
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                Console.WriteLine($"Checking connection");
-                var publicKey = await GetWalletPublicKey();
-                if (publicKey == null)
-                {
-                    Console.WriteLine($"publicKey object ref is null");
-                    await Task.Delay(100, ct);
-                    continue;
-                }
-                _publicKey = new PublicKey(publicKey);
-                OnConnected?.Invoke();
-                _cts.Cancel();
-            }
         }
         
         private async Task<string> GetWalletPublicKey()

@@ -36,7 +36,6 @@ else
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
 
     [Parameter] public List<WalletProvider> Adapters { get; set; }
-    //private EventInterop Interop { get; set; }
 
     private bool Connecting { get; set; }
     private WalletProvider WalletProvider { get; set; }
@@ -54,25 +53,10 @@ else
         }
         _appState.OnChange -= StateHasChanged;
     }
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //{
-    //    if (!firstRender)
-    //    {
-    //        return;
-    //    }
-    //    Interop = new(_jsRuntime);
-    //    await Interop.SetupEventCallback(args => HandleEvent(args));
-    //}
-    //private Task HandleEvent(EventArgs args)
-    //{
-    //    Console.WriteLine("Event handled");
-    //    OnConnected();
-    //    return Task.CompletedTask;
-    //}
+    
     private async void SelectAdapter(string adapterName)
     {
         Connecting = true;
-        Console.WriteLine($"Adapter Selected: {adapterName}");
         WalletProvider = Adapters.FirstOrDefault(adapter => adapter.Name == adapterName);
         if (WalletProvider == null)
         {

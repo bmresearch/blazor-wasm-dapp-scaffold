@@ -35,7 +35,9 @@
                 
                 <p class="p-md-4">Current Balance: @CurrentBalance SOL</p>
                 
-                <button class="px-4 btn btn-primary" @onclick="SendMemo">Send Hello SolNet x Web3.js Memo</button>
+                <button class="px-4 btn btn-primary" @onclick="SendMemoSignMessage">Send Hello SolNet x Web3.js Memo - Sign Message</button>
+
+                <button class="px-4 btn btn-primary" @onclick="SendMemoSignTransaction">Send Hello SolNet x Web3.js Memo - Sign Transaction</button>
                 
                 <!--button class="px-4 btn btn-primary">Request Airdrop</button-->
             </div>
@@ -79,24 +81,36 @@
         _walletService.OnConnected -= WalletServiceOnOnConnected;
     }
 
-    private async Task SendMemo()
+    private async Task SendMemoSignMessage()
     {
-        Console.WriteLine("Start of SendMemo()");
         var blockHash = await RpcClient.GetRecentBlockHashAsync();
-        Console.WriteLine($"BlockHash: {blockHash.Result.Value.Blockhash}");
-        Console.WriteLine($"public key: {_walletService.PublicKey}");
         var msgBytes = new TransactionBuilder()
             .SetRecentBlockHash(blockHash.Result.Value.Blockhash)
             .SetFeePayer(_walletService.PublicKey)
             .AddInstruction(MemoProgram.NewMemoV2("Hello Solnet x solana-web3.js from Blazor Wasm"))
             .CompileMessage();
+        try {
+            var txBytes = await _walletService.SignMessage(msgBytes);
+            await _jsRunTime.InvokeVoidAsync("alert", $"Signed message: {Convert.ToBase64String(msgBytes)}");
+        }
+        catch(Exception ex)
+        {
+            await _jsRunTime.InvokeVoidAsync("alert","Your selected wallet adapter does not currently support Sign Message");
+        }
 
-        Console.WriteLine("msgBytes=" + msgBytes);
+    }
+
+    private async Task SendMemoSignTransaction()
+    {
+        var blockHash = await RpcClient.GetRecentBlockHashAsync();
+        var msgBytes = new TransactionBuilder()
+            .SetRecentBlockHash(blockHash.Result.Value.Blockhash)
+            .SetFeePayer(_walletService.PublicKey)
+            .AddInstruction(MemoProgram.NewMemoV2("Hello Solnet x solana-web3.js from Blazor Wasm"))
+            .CompileMessage();
         var txBytes = await _walletService.SignTransaction(msgBytes);
         Console.WriteLine($"Signed transaction: {Convert.ToBase64String(msgBytes)}");
         var txSig = await RpcClient.SendTransactionAsync(txBytes);
-        Console.WriteLine("raw rpc request = " + txSig.RawRpcRequest);
-        Console.WriteLine("raw rpc response = " + txSig.RawRpcResponse);
         Console.WriteLine($"Transaction signature: {txSig.Result}");
     }
 }
