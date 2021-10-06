@@ -4,21 +4,22 @@
     <TargetFramework>net5.0</TargetFramework>
     <JsLibRoot>JsLib\</JsLibRoot>
     <TypeScriptToolsVersion>3.2</TypeScriptToolsVersion>
+    <AssemblyName>dapp.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazored.Modal" Version="6.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.9" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.10" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.4.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Solnet.Extensions" Version="0.4.6" />
-    <PackageReference Include="Solnet.Programs" Version="0.4.6" />
-    <PackageReference Include="Solnet.Rpc" Version="0.4.6" />
-    <PackageReference Include="Solnet.Serum" Version="1.0.0" />
-    <PackageReference Include="Solnet.Wallet" Version="0.4.6" />
+    <PackageReference Include="Solnet.Extensions" Version="0.4.8" />
+    <PackageReference Include="Solnet.Programs" Version="0.4.8" />
+    <PackageReference Include="Solnet.Rpc" Version="0.4.8" />
+    <PackageReference Include="Solnet.Serum" Version="1.0.2" />
+    <PackageReference Include="Solnet.Wallet" Version="0.4.8" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
 

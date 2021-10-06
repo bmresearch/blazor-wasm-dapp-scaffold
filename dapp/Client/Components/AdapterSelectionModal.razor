@@ -36,10 +36,10 @@ else
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
 
     [Parameter] public List<WalletProvider> Adapters { get; set; }
-    
+
     private bool Connecting { get; set; }
     private WalletProvider WalletProvider { get; set; }
-    
+
     protected override void OnInitialized()
     {
         _appState.OnChange += StateHasChanged;
@@ -53,18 +53,16 @@ else
         }
         _appState.OnChange -= StateHasChanged;
     }
-
+    
     private async void SelectAdapter(string adapterName)
     {
         Connecting = true;
-        Console.WriteLine($"Adapter Selected: {adapterName}");
         WalletProvider = Adapters.FirstOrDefault(adapter => adapter.Name == adapterName);
         if (WalletProvider == null)
         {
             Connecting = false;
             return;
         }
-        
         await WalletProvider.Load(_jsRuntime);
         WalletProvider.OnConnected += OnConnected;
         await WalletProvider.Connect();
